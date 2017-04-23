@@ -21,8 +21,8 @@ class Game():
         self.screen.fill((0, 0, 0))
         self.framerate = 30
         self.press_tolerance = 0.3
-        self.time = 0
-        self.beat_time = 6
+        self.time = 0.0
+        self.beat_time = 8.0
         self.player = Player(3)
         self.curr_pad = Pad(self.player.pos)
         self.num_items = 4
@@ -49,12 +49,12 @@ class Game():
             pygame.display.update()
             pygame.event.pump()
             self.screen.fill((0, 0, 0))
-            bkpos += (self.player.pos - bkpos) / self.framerate * 3
+            bkpos += (self.player.pos - bkpos) / float(self.framerate) * 3.0
             in_time = 0
             self.board.render_background(bkpos, in_time)
             self.board.update_board()
             pressed = pygame.key.get_pressed()
-            bkpos += (self.player.pos - bkpos) / self.framerate * 3
+            bkpos += (self.player.pos - bkpos) / float(self.framerate) * 3.0
             self.time += 1
             self.make_tic()
             self.board.render_lives(self.player.lives, (WINDOW_WIDTH - 100, 50))
@@ -67,15 +67,15 @@ class Game():
             pygame.display.update()
             pygame.event.pump()
             self.screen.fill((0, 0, 0))
-            bkpos += (self.player.pos - bkpos) / self.framerate * 3
+            bkpos += float(self.player.pos - bkpos) / self.framerate * 3
             self.time += 1
             self.jumpt += 1
-            a = self.time%(self.framerate*self.beat_time)
+            a = self.time % (float(self.framerate*self.beat_time))
             pressed = pygame.key.get_pressed()
             kdict = self.curr_pad.KEY_DICT
             active_key = kdict[seq[0]]
             boom_key = kdict[5]
-            in_time = (a <= self.framerate*self.press_tolerance) or (a >= self.framerate*self.beat_time - self.framerate*self.press_tolerance) # check if is valid
+            in_time = (a <= self.framerate*self.press_tolerance) or (a >= float(self.framerate*self.beat_time) - self.framerate*self.press_tolerance) # check if is valid
             if in_time:
                 #self.screen.fill((30, 30, 30))
                 pass
@@ -113,7 +113,6 @@ class Game():
                 self.player.state = STATE_SLASH_L
                 self.slash_l_sprite.curr_frame = 1
                 self.flare_list.append(Flare(self.index_to_pos(used[-1]), 50, self.screen, 0.4))
-                print(self.index_to_pos(used[-1]))
             elif pressed[boom_key] and boom_key not in exempt_keys and active_key == boom_key:
                 if self.player.pos == 1 or (self.player.pos != 7 and random() < 0.5):
                     self.player.pos += 1
@@ -140,7 +139,7 @@ class Game():
             self.board.make_blue(seq[0])
             self.board.print_seq(seq)
             self.board.print_active(active_key)
-            dfade = 2000/self.framerate/self.beat_time
+            dfade = 2000.0/self.framerate/self.beat_time
             print(dfade)
             self.board.old_slash_alpha -= dfade
             for flare in self.flare_list:
@@ -162,7 +161,7 @@ class Game():
         pass
 
     def make_tic(self):
-        tic_speed = int(6 * self.framerate / 50)
+        tic_speed = int(6.0 * self.framerate / 50.0)
         can_change = (self.player.state != STATE_JUMP_R)
         if self.player.state == STATE_ALIVE and can_change:
             self.static_sprite.tic((800, 480), self.time % tic_speed != 0)
@@ -172,13 +171,13 @@ class Game():
             self.damaged_sprite.tic((800, 480), self.time % tic_speed != 0)
         elif self.player.state == STATE_JUMP_R:
             time_total = 1.5 * self.framerate
-            amt_thru = self.jumpt/time_total
+            amt_thru = self.jumpt/float(time_total)
             ydis = 80
             yoff = max(0, sin(amt_thru * 2 * pi) * ydis)
             self.jump_r_sprite.tic((800, 480 - yoff), self.jumpt % tic_speed != 0)
         elif self.player.state == STATE_JUMP_L:
             time_total = 1.5 * self.framerate
-            amt_thru = self.jumpt/time_total
+            amt_thru = self.jumpt/float(time_total)
             ydis = 80
             yoff = max(0, sin(amt_thru * 2 * pi) * ydis)
             self.jump_l_sprite.tic((800, 480 - yoff), self.jumpt % tic_speed != 0)

@@ -197,13 +197,13 @@ def change_alpha(img, alpha=255, redden = True): #   change opacity of img to al
         for y in range(0,height):
             r,g,b,old_alpha=img.get_at((x,y))
             if redden:
-                prop = (1 - (alpha + 100)/600)
+                prop = (1 - (alpha + 100)/600.0)
                 g, b = prop*g, prop*b
-            img.set_at((x,y),(r,g,b,alpha/255*old_alpha))
+            img.set_at((x,y),(r,g,b,alpha/255.0*float(old_alpha)))
 
 def change_brightness(img, f = 0.75):
     width, height = img.get_size()
     for x in range(0, width):
         for y in range(0, height):
             r, g, b, alpha = img.get_at((x, y))
-            img.set_at((x, y), (r*f, g*f, b*f, alpha))
+            img.set_at((x, y), (r*f, g*f, b*f, float(alpha)))
