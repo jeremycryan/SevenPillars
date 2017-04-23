@@ -22,7 +22,7 @@ class Sprite():
         return position + framesize
 
     def tic(self, pos, halt = False):
-        pos = (pos[0] - self.scale/2, pos[1] - self.scale/2)
+        pos = (pos[0] - self.scale/2, pos[1] - self.scale/2 + 50)
         self.render_frame(self.curr_frame, pos)
         if not halt and not self.rev:
             self.curr_frame += 1
@@ -50,5 +50,5 @@ class Sprite():
         for x in range(0, width):
             for y in range(0, height):
                 r, g, b, alpha = img.get_at((x, y))
-                if (r, g, b) == (255, 0, 0):
+                if r > 180 and g < 50 and b < 50:
                     img.set_at((x, y), (r, g, b, 0))

@@ -8,8 +8,9 @@ class Board():
         self.debug_font = pygame.font.SysFont('myriad pro cond', 50)
         self.screen = screen
         self.mesh = pygame.image.load(os.path.join('mesh.png')).convert_alpha()
-        self.mesh = pygame.transform.scale(self.mesh, (400, 400))
+        self.mesh = pygame.transform.scale(self.mesh, (100, 100))
         change_alpha(self.mesh, 50, False)
+        self.mesh = pygame.transform.scale(self.mesh, (400, 400))
         change_brightness(self.mesh, 0.6)
         self.mesh_pos = (WINDOW_WIDTH/2 - 200, 100)
         self.slash_list = []
@@ -26,20 +27,24 @@ class Board():
         self.pillars = pygame.image.load(os.path.join('pillars.png')).convert_alpha()
         self.pillars = pygame.transform.scale(self.pillars, (int(WINDOW_WIDTH * 2.5), WINDOW_HEIGHT))
         self.white_screen = pygame.image.load(os.path.join('white_pixel.png')).convert_alpha()
-        change_alpha(self.white_screen, 50, False)
+        change_alpha(self.white_screen, 80, False)
         self.blue = pygame.image.load(os.path.join('blue.png')).convert_alpha()
         self.white = pygame.image.load(os.path.join('cirquel.png')).convert_alpha()
         self.bpos = (0, 0)
         self.cat = pygame.image.load(os.path.join('catface.png')).convert_alpha()
+        self.logo = pygame.image.load(os.path.join('seven_pillars.png')).convert_alpha()
+        self.logo = pygame.transform.scale(self.logo, (600, 400))
         change_alpha(self.blue, 120)
 
     def render_lives(self, number, position):
         xpos = position[0]
         ypos = position[1]
         spacing = 50
-        self.screen.blit(self.cat, position)
+        cat = pygame.image.load(os.path.join('catface.png')).convert_alpha()
+        #change_alpha(cat, 175)
+        self.screen.blit(cat, position)
         if number > 1:
-            self.render_lives(number - 1, (xpos, ypos + spacing))
+            self.render_lives(number - 1, (xpos + spacing, ypos))
 
     def make_blue(self, pos):
         xpos, ypos = COORD_DICT[pos]
@@ -98,13 +103,25 @@ class Board():
             white = self.white_screen
             white = pygame.transform.scale(white, (WINDOW_WIDTH, WINDOW_HEIGHT))
             self.screen.blit(white, (0, 0))
-        self.screen.blit(self.pillars, (ppos, 0))
+        self.screen.blit(self.pillars, (ppos, 50))
 
-    def render_washout(self, should_do):
-        if should_do:
-            white = self.white_screen
-            white = pygame.transform.scale(white, (WINDOW_WIDTH, WINDOW_HEIGHT))
-            self.screen.blit(white, (0, 0))
+    def render_washout(self, alpha):
+        self.white = pygame.image.load(os.path.join('white_pixel.png')).convert_alpha()
+        change_alpha(self.white, alpha * 255.0, True)
+        white = pygame.transform.scale(self.white, (WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.screen.blit(white, (0, 0))
+
+    def make_logo(self, pos, t):
+        cap = 30.0
+        t = max(0, t)
+        done = t/cap
+        alpha = (1-done) * 255
+        if done < 1:
+            logo = pygame.image.load(os.path.join('seven_pillars.png')).convert_alpha()
+            change_alpha(logo, alpha, False)
+            logo = pygame.transform.scale(logo, (int(600 + 30*done), int(400 + 30*done)))
+            self.screen.blit(logo, pos)
+
 
 class Slash():
     def __init__(self, num1, num2, board, icon = False):
@@ -185,6 +202,7 @@ class Flare():
         self.pos = (self.init_pos[0] - self.s1/2 * self.scale, self.init_pos[1] - self.s1/2 * self.scale)
         self.opacity = int(max(0, 255 - self.flaret * 5)) * self.start_opacity
         flare = pygame.image.load(os.path.join('cirquel.png')).convert_alpha()
+        flare = pygame.transform.scale(flare, (40, 40))
         self.flaret += 3
         if self.opacity > 0:
             change_alpha(flare, self.opacity, self.redden)
