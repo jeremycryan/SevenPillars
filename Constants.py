@@ -23,4 +23,6 @@ DIRECTION_DICT = {1:(-1, -1), 2:(0, -1), 3:(1, -1), 4:(-1, 0), 5:(0, 0), 6:(1, 0
 
 # States
 STATE_ALIVE = 0
-STATE_ALIVE = 1
+STATE_SLASH_L = 1
+STATE_JUMP_R = 2
+STATE_JUMP_L = 3
