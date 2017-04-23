@@ -28,8 +28,18 @@ class Board():
         self.white_screen = pygame.image.load(os.path.join('white_pixel.png')).convert_alpha()
         change_alpha(self.white_screen, 50, False)
         self.blue = pygame.image.load(os.path.join('blue.png')).convert_alpha()
+        self.white = pygame.image.load(os.path.join('cirquel.png')).convert_alpha()
         self.bpos = (0, 0)
+        self.cat = pygame.image.load(os.path.join('catface.png')).convert_alpha()
         change_alpha(self.blue, 120)
+
+    def render_lives(self, number, position):
+        xpos = position[0]
+        ypos = position[1]
+        spacing = 50
+        self.screen.blit(self.cat, position)
+        if number > 1:
+            self.render_lives(number - 1, (xpos, ypos + spacing))
 
     def make_blue(self, pos):
         xpos, ypos = COORD_DICT[pos]
@@ -90,6 +100,12 @@ class Board():
             self.screen.blit(white, (0, 0))
         self.screen.blit(self.pillars, (ppos, 0))
 
+    def render_washout(self, should_do):
+        if should_do:
+            white = self.white_screen
+            white = pygame.transform.scale(white, (WINDOW_WIDTH, WINDOW_HEIGHT))
+            self.screen.blit(white, (0, 0))
+
 class Slash():
     def __init__(self, num1, num2, board, icon = False):
         local_origin = (WINDOW_WIDTH/2 - 310 + board.true_offset[0], board.true_offset[1] - 20)
@@ -121,7 +137,7 @@ class Slash():
     def render_slash(self, pos, alpha = 255):
         img = pygame.transform.scale(self.slash, (int(100 * self.length * self.compress), int(30 * self.compress)))
         if alpha != 255:
-            change_alpha(img, alpha)
+            change_alpha(img, alpha, False)
         img = pygame.transform.scale(img, (int(100 * self.length), int(30)))
         img = pygame.transform.rotate(img, self.angle)
         surface = self.board.screen
@@ -148,6 +164,32 @@ class Slash():
         if alpha != 255:
             change_alpha(img, alpha)
         self.board.screen.blit(img, pos)
+
+class Flare():
+    def __init__(self, pos, s1, screen, start_opacity, redden = False):
+        self.redden = redden
+        self.start_opacity = start_opacity
+        self.screen = screen
+        self.init_pos = pos
+        self.flaret = 0
+        self.s1 = s1
+        self.scale = sqrt(self.flaret * 0.1 + 1)
+        self.pos = (pos[0] - s1/2 * self.scale, pos[1] - s1/2 * self.scale)
+        self.opacity = int(max(0, 255 - self.flaret * 5)) * start_opacity
+        self.flare = pygame.image.load(os.path.join('cirquel.png')).convert_alpha()
+        pygame.transform.scale(self.flare, (int(s1 * self.scale), int(s1 * self.scale)))
+
+
+    def update(self):
+        self.scale = sqrt(self.flaret * 0.1 + 1)
+        self.pos = (self.init_pos[0] - self.s1/2 * self.scale, self.init_pos[1] - self.s1/2 * self.scale)
+        self.opacity = int(max(0, 255 - self.flaret * 5)) * self.start_opacity
+        flare = pygame.image.load(os.path.join('cirquel.png')).convert_alpha()
+        self.flaret += 3
+        if self.opacity > 0:
+            change_alpha(flare, self.opacity, self.redden)
+            flare = pygame.transform.scale(flare, (int(self.s1 * self.scale), int(self.s1 * self.scale)))
+            self.screen.blit(flare, self.pos)
 
 def change_alpha(img, alpha=255, redden = True): #   change opacity of img to alpha
     width,height=img.get_size()

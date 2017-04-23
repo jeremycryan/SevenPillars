@@ -10,6 +10,7 @@ class Player():
     def __init__(self, pos):
         self.pos = pos
         self.state = STATE_ALIVE
+        self.lives = 9
 
 class Game():
     def initialize(self):
@@ -21,7 +22,7 @@ class Game():
         self.framerate = 30
         self.press_tolerance = 0.3
         self.time = 0
-        self.beat_time = 3
+        self.beat_time = 6
         self.player = Player(3)
         self.curr_pad = Pad(self.player.pos)
         self.num_items = 4
@@ -32,6 +33,7 @@ class Game():
         self.slash_l_sprite = Sprite('slashLC.png', (90, 90), 4, self.screen, self.player, 225)
         self.jump_r_sprite = Sprite('jumpR.png', (90, 90), 9, self.screen, self.player, 225)
         self.jump_l_sprite = Sprite('jumpR.png', (90, 90), 9, self.screen, self.player, 225, True)
+        self.damaged_sprite = Sprite('damage.png', (60, 60), 6, self.screen, self.player, 150)
 
     def mainloop(self):
         is_running = 1
@@ -40,7 +42,27 @@ class Game():
         seq = gen_sequence(self.num_items)
         used = []
         exempt_keys = []
+        self.flare_list = []
         bkpos = self.player.pos
+        is_intro = 1
+        while is_intro:
+            pygame.display.update()
+            pygame.event.pump()
+            self.screen.fill((0, 0, 0))
+            bkpos += (self.player.pos - bkpos) / self.framerate * 3
+            in_time = 0
+            self.board.render_background(bkpos, in_time)
+            self.board.update_board()
+            pressed = pygame.key.get_pressed()
+            bkpos += (self.player.pos - bkpos) / self.framerate * 3
+            self.time += 1
+            self.make_tic()
+            self.board.render_lives(self.player.lives, (WINDOW_WIDTH - 100, 50))
+            pygame.display.flip()
+            self.clock.tick(self.framerate)
+            if pressed[pygame.K_SPACE]:
+                is_intro = False
+        self.time = -self.framerate * 5
         while is_running:
             pygame.display.update()
             pygame.event.pump()
@@ -90,7 +112,9 @@ class Game():
                     self.board.render_slashes(Slash(used[-2], used[-1], self.board))
                 self.player.state = STATE_SLASH_L
                 self.slash_l_sprite.curr_frame = 1
-            elif in_time and pressed[boom_key] and boom_key not in exempt_keys and active_key == boom_key:
+                self.flare_list.append(Flare(self.index_to_pos(used[-1]), 50, self.screen, 0.4))
+                print(self.index_to_pos(used[-1]))
+            elif pressed[boom_key] and boom_key not in exempt_keys and active_key == boom_key:
                 if self.player.pos == 1 or (self.player.pos != 7 and random() < 0.5):
                     self.player.pos += 1
                     direc = 0
@@ -107,14 +131,24 @@ class Game():
                     self.player.state = STATE_JUMP_L
                     self.jump_l_sprite.curr_frame = 9
                 self.jumpt = 0
-            else:
-                self.board.render_slashes()
+                self.flare_list.append(Flare(self.index_to_pos(5), 150, self.screen, 1.0))
+                if random() < 0.2 and self.num_items < 9:
+                    self.num_items += 1
+                self.beat_time *=0.95
+                self.time = 0
+            self.board.render_slashes()
             self.board.make_blue(seq[0])
             self.board.print_seq(seq)
             self.board.print_active(active_key)
             dfade = 2000/self.framerate/self.beat_time
+            print(dfade)
             self.board.old_slash_alpha -= dfade
+            for flare in self.flare_list:
+                flare.update()
+                if flare.opacity <= 0:
+                    self.flare_list.remove(flare)
             self.make_tic()
+            self.board.render_lives(self.player.lives, (WINDOW_WIDTH - 100, 50))
             pygame.display.flip()
             self.clock.tick(self.framerate)
             if pressed[pygame.K_ESCAPE]:
@@ -122,6 +156,9 @@ class Game():
         pygame.quit()
 
     def ouch(self):
+        self.player.lives -= 1
+        self.flare_list.append(Flare(self.index_to_pos(8), 300, self.screen, 0.7, True))
+        self.player.state = STATE_DAMAGED
         pass
 
     def make_tic(self):
@@ -131,6 +168,8 @@ class Game():
             self.static_sprite.tic((800, 480), self.time % tic_speed != 0)
         elif self.player.state == STATE_SLASH_L and can_change:
             self.slash_l_sprite.tic((800, 480), self.time % tic_speed != 0)
+        elif self.player.state == STATE_DAMAGED:
+            self.damaged_sprite.tic((800, 480), self.time % tic_speed != 0)
         elif self.player.state == STATE_JUMP_R:
             time_total = 1.5 * self.framerate
             amt_thru = self.jumpt/time_total
@@ -143,6 +182,14 @@ class Game():
             ydis = 80
             yoff = max(0, sin(amt_thru * 2 * pi) * ydis)
             self.jump_l_sprite.tic((800, 480 - yoff), self.jumpt % tic_speed != 0)
+
+    def index_to_pos(self, ind):
+        coord = COORD_DICT[ind]
+        x = coord[0]
+        y = coord[1]
+        xpos = 158 * x + 490
+        ypos = 158 * y - 10
+        return((xpos, ypos))
 
 
 if __name__ == "__main__":
