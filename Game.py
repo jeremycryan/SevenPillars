@@ -168,9 +168,9 @@ class Game():
                     self.jump_l_sprite.curr_frame = 9
                 self.jumpt = 0
                 self.flare_list.append(Flare(self.index_to_pos(5), 150, self.screen, 1.0))
-                if random() < 0.2 and self.num_items < 9:
+                if random() < 0.25 and self.num_items < 9:
                     self.num_items += 1
-                self.beat_time *=0.93
+                self.beat_time *=0.91
                 self.time = 0
                 num_complete += 1
                 if num_complete == 1:
