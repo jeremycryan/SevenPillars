@@ -94,8 +94,8 @@ class Board():
         spos = -pos_prop * WINDOW_WIDTH/2 * 0.4
         mpos = -pos_prop * WINDOW_WIDTH/2 * 1.0
         mypos = -pos_prop * WINDOW_WIDTH/2 * 2.5
-        pillar_offset = 780
-        ppos = -pos_prop * WINDOW_WIDTH/2 * 4.4 + pillar_offset
+        pillar_offset = 760
+        ppos = -pos_prop * WINDOW_WIDTH/2 * 4.33 + pillar_offset
         self.screen.blit(self.sky, (spos, 0))
         self.screen.blit(self.mountains, (mpos, 0))
         self.screen.blit(self.mist, (mypos, 0))

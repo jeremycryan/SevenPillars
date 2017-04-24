@@ -14,15 +14,16 @@ class Player():
         self.lives = 9
 
 class Game():
-    def initialize(self):
-        pygame.init()
-        pygame.mixer.init()
-        pygame.mixer.music.load(os.path.join('ambience2.wav'))
-        pygame.mixer.music.play(-1)
-        pygame.display.set_caption("Seven Pillars")
-        self.screen = pygame.display.set_mode([WINDOW_WIDTH, WINDOW_HEIGHT])
-        self.board = Board(self.screen)
-        self.screen.fill((0, 0, 0))
+    def initialize(self, first = True):
+        if first:
+            pygame.init()
+            pygame.mixer.init()
+            pygame.mixer.music.load(os.path.join('ambience2.wav'))
+            pygame.mixer.music.play(-1)
+            pygame.display.set_caption("Seven Pillars")
+            self.screen = pygame.display.set_mode([WINDOW_WIDTH, WINDOW_HEIGHT])
+            self.board = Board(self.screen)
+            self.screen.fill((0, 0, 0))
         self.framerate = 20
         self.press_tolerance = 0.3
         self.time = 0.0
@@ -155,6 +156,7 @@ class Game():
                 else:
                     self.player.pos -= 1
                     direc = 1
+                #self.player.pos = randint(1, 7)
                 self.curr_pad = Pad(self.player.pos)
                 if len(used) > 1:
                     self.board.render_slashes(Slash(used[-1], 5, self.board))
@@ -225,11 +227,13 @@ class Game():
                 self.board.render_background(sin(timer/float(self.framerate)*2.0*pi/60.0)*3 + 4)
                 game_over = pygame.image.load(os.path.join('game_over.png')).convert_alpha()
                 game_over = pygame.transform.scale(game_over, (300, 200))
+                if timer % self.framerate < self.framerate / 2:
+                    self.screen.blit(self.space_to_start, (642, 15))
                 self.screen.blit(game_over, (WINDOW_WIDTH/2 - 150, WINDOW_HEIGHT/2 - 100))
                 pressed = pygame.key.get_pressed()
                 if pressed[pygame.K_SPACE] != 0:
                     self.player.state = STATE_ALIVE
-                    self.initialize()
+                    self.initialize(0)
                     is_running = 1
                     self.time += 1
                     can_complete = 0
